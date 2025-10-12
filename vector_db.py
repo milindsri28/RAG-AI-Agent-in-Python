@@ -32,5 +32,6 @@ class QdrantStorage:
             if text:
                 contexts.append(text)
                 sources.add(source)
-            return {"contexts" : contexts, "sources":list(sources)}
+        
+        return {"contexts": contexts, "sources": list(sources)}
         
