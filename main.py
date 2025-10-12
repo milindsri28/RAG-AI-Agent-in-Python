@@ -96,4 +96,94 @@ async def rag_query_pdf_ai(ctx: inngest.Context):
 
 app = FastAPI()
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Pydantic models for API requests
+class IngestRequest(BaseModel):
+    pdf_path: str
+    source_id: str
+
+class QueryRequest(BaseModel):
+    question: str
+    top_k: int = 5
+
+# REST API endpoints
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload and save PDF file"""
+    if not file.filename.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+    
+    # Ensure uploads directory exists
+    uploads_dir = Path("uploads")
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Save file
+    file_path = uploads_dir / file.filename
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        return JSONResponse({
+            "message": "File uploaded successfully",
+            "file_path": str(file_path.resolve()),
+            "filename": file.filename
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
+@app.post("/api/ingest")
+async def trigger_ingest(request: IngestRequest):
+    """Trigger PDF ingestion workflow"""
+    try:
+        event_result = await inngest_client.send(
+            inngest.Event(
+                name="rag/ingest_pdf",
+                data={
+                    "pdf_path": request.pdf_path,
+                    "source_id": request.source_id,
+                },
+            )
+        )
+        
+        return JSONResponse({
+            "message": "Ingestion started",
+            "event_id": event_result[0] if event_result else None
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to trigger ingestion: {str(e)}")
+
+@app.post("/api/query")
+async def trigger_query(request: QueryRequest):
+    """Trigger PDF query workflow"""
+    try:
+        event_result = await inngest_client.send(
+            inngest.Event(
+                name="rag/query_pdf_ai",
+                data={
+                    "question": request.question,
+                    "top_k": request.top_k,
+                },
+            )
+        )
+        
+        return JSONResponse({
+            "message": "Query started",
+            "event_id": event_result[0] if event_result else None
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to trigger query: {str(e)}")
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "message": "RAG API is running"}
+
 inngest.fast_api.serve(app, inngest_client, functions= [rag_ingest_pdf, rag_query_pdf_ai])
