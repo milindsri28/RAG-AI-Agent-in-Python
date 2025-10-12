@@ -91,4 +91,19 @@ async def rag_query_pdf_ai(ctx: inngest.Context):
 
 app = FastAPI()
 
+# Enable CORS for React frontend
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # React dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include API routes for React frontend
+from api_routes import router as api_router
+app.include_router(api_router)
+
 inngest.fast_api.serve(app, inngest_client, functions= [rag_ingest_pdf, rag_query_pdf_ai])
