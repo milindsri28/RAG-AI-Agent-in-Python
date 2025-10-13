@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileCheck, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../utils/errorHandler';
 
 interface FileUploadProps {
   onUploadSuccess: (filename: string) => void;
@@ -29,10 +30,15 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
       });
 
       toast.success(`✅ ${file.name} uploaded successfully!`);
+      
+      // Wait a moment for backend to process before triggering refresh
+      await new Promise(resolve => setTimeout(resolve, 800));
       onUploadSuccess(file.name);
+      
       return true;
     } catch (error: any) {
-      toast.error(`Failed to upload ${file.name}: ${error.response?.data?.detail || error.message}`);
+      const errorMessage = getErrorMessage(error);
+      toast.error(`Failed to upload ${file.name}: ${errorMessage}`);
       return false;
     }
   };

@@ -1,5 +1,5 @@
 from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct
+from qdrant_client.models import VectorParams, Distance, PointStruct, Filter, FieldCondition, MatchValue
 
 class QdrantStorage:
     def __init__(self, url="http://localhost:6333", collection="docs", dim=3072): 
@@ -15,10 +15,24 @@ class QdrantStorage:
         points = [PointStruct(id=ids[i], vector=vectors[i], payload=payloads[i]) for i in range(len(ids))]
         self.client.upsert(collection_name=self.collection, points=points)
         
-    def search(self, query_vector, top_k: int = 5):
+    def search(self, query_vector, top_k: int = 5, source_filter: str = None):
+        # Build query filter if source is specified
+        # If source_filter is "__ALL__", search across all documents
+        query_filter = None
+        if source_filter and source_filter != "__ALL__":
+            query_filter = Filter(
+                must=[
+                    FieldCondition(
+                        key="source",
+                        match=MatchValue(value=source_filter)
+                    )
+                ]
+            )
+        
         results = self.client.search(
             collection_name=self.collection,
             query_vector=query_vector,
+            query_filter=query_filter,
             with_payload=True,
             limit=top_k
         )
@@ -32,5 +46,6 @@ class QdrantStorage:
             if text:
                 contexts.append(text)
                 sources.add(source)
-            return {"contexts" : contexts, "sources":list(sources)}
+        
+        return {"contexts": contexts, "sources": list(sources)}
         

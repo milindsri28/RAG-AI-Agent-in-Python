@@ -49,23 +49,24 @@ async def rag_ingest_pdf(ctx: inngest.Context):
     trigger=inngest.TriggerEvent(event="rag/query_pdf_ai")
 )
 async def rag_query_pdf_ai(ctx: inngest.Context):
-    def _search(question: str, top_k: int = 5) -> RAGSearchResult:
+    def _search(question: str, top_k: int = 5, source_file: str = None) -> RAGSearchResult:
         query_vec = embed_text([question])[0]
         store = QdrantStorage()
-        found = store.search(query_vec, top_k)
+        found = store.search(query_vec, top_k, source_filter=source_file)
         return RAGSearchResult(contexts=found["contexts"], sources=found["sources"])
 
     question = ctx.event.data["question"]
     top_k = int(ctx.event.data.get("top_k", 5))
+    source_file = ctx.event.data.get("source_file")
 
-    found = await ctx.step.run("embed-and-search", lambda: _search(question, top_k), output_type=RAGSearchResult)
+    found = await ctx.step.run("embed-and-search", lambda: _search(question, top_k, source_file), output_type=RAGSearchResult)
 
     context_block = "\n\n".join(f"- {c}" for c in found.contexts)
     user_content = (
-        "Use the following context to answer the question.\n\n"
+        "Use the following context from the document to answer the question.\n\n"
         f"Context:\n{context_block}\n\n"
         f"Question: {question}\n"
-        "Answer concisely using the context above."
+        "Provide a detailed and helpful answer based on the context above."
     )
 
     adapter = ai.openai.Adapter(
@@ -73,14 +74,27 @@ async def rag_query_pdf_ai(ctx: inngest.Context):
         model="gpt-4o-mini"
     )
 
+    system_prompt = """You are a helpful AI assistant that answers questions based on provided document context.
+
+Your guidelines:
+1. Provide detailed, comprehensive answers using the context provided
+2. If the context contains the information, expand on it and explain thoroughly
+3. Structure your answers clearly with proper formatting
+4. If the context mentions topics but lacks details, acknowledge what's available and what's missing
+5. Be helpful and informative - don't be overly restrictive
+6. If asked to list or enumerate items from the context, do so clearly
+7. When the context has partial information, provide what's available rather than refusing to answer
+
+Always base your answers on the provided context, but be as helpful and detailed as possible."""
+
     res = await ctx.step.ai.infer(
         "llm-answer",
         adapter=adapter,
         body={
-            "max_tokens": 1024,
-            "temperature": 0.2,
+            "max_tokens": 2048,  # Increased for more detailed answers
+            "temperature": 0.3,  # Slightly increased for more natural responses
             "messages": [
-                {"role": "system", "content": "You answer questions using only the provided context."},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content}
             ]
         }

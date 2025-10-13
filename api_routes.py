@@ -4,7 +4,7 @@ Exposes existing functionality without changing core logic
 """
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 import asyncio
 from pathlib import Path
@@ -21,6 +21,7 @@ router = APIRouter()
 class QueryRequest(BaseModel):
     question: str
     top_k: int = 5
+    source_file: Optional[str] = None
 
 class QueryResponse(BaseModel):
     answer: str
@@ -93,6 +94,7 @@ async def query_documents(request: QueryRequest):
                 data={
                     "question": request.question,
                     "top_k": request.top_k,
+                    "source_file": request.source_file,
                 },
             )
         )
@@ -151,3 +153,164 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "message": "RAG AI Agent API is running"}
 
+
+@router.get("/api/files")
+async def list_files():
+    """
+    List all uploaded PDF files with metadata
+    """
+    try:
+        uploads_dir = Path("uploads")
+        if not uploads_dir.exists():
+            return {"files": []}
+        
+        # Get all files with metadata
+        files = []
+        for file_path in uploads_dir.glob("*.pdf"):
+            filename = file_path.name
+            # Extract original filename (format: uuid_originalname.pdf)
+            if "_" in filename:
+                original_name = "_".join(filename.split("_")[1:])
+            else:
+                original_name = filename
+            
+            # Get file stats
+            stats = file_path.stat()
+            file_size_bytes = stats.st_size
+            
+            # Format file size
+            if file_size_bytes < 1024:
+                size_str = f"{file_size_bytes} B"
+            elif file_size_bytes < 1024 * 1024:
+                size_str = f"{file_size_bytes / 1024:.1f} KB"
+            else:
+                size_str = f"{file_size_bytes / (1024 * 1024):.1f} MB"
+            
+            # Get upload date (file creation/modification time)
+            from datetime import datetime
+            upload_date = datetime.fromtimestamp(stats.st_mtime).isoformat()
+            
+            files.append({
+                "name": original_name,
+                "size": size_str,
+                "size_bytes": file_size_bytes,
+                "upload_date": upload_date,
+                "path": str(file_path)
+            })
+        
+        # Sort by upload date (most recent first)
+        files.sort(key=lambda x: x["upload_date"], reverse=True)
+        
+        return {"files": files}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/api/delete/{filename}")
+async def delete_file(filename: str):
+    """
+    Delete a specific PDF file
+    """
+    try:
+        uploads_dir = Path("uploads")
+        if not uploads_dir.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Find the file with the matching original name (after UUID_)
+        deleted = False
+        for file_path in uploads_dir.glob("*.pdf"):
+            if file_path.name.endswith(f"_{filename}"):
+                file_path.unlink()
+                deleted = True
+                break
+        
+        if not deleted:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        return {
+            "status": "success",
+            "message": f"Successfully deleted {filename}"
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class RenameRequest(BaseModel):
+    old_name: str
+    new_name: str
+
+
+@router.put("/api/rename")
+async def rename_file(request: RenameRequest):
+    """
+    Rename a specific PDF file
+    """
+    try:
+        uploads_dir = Path("uploads")
+        if not uploads_dir.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Validate new name
+        if not request.new_name.endswith('.pdf'):
+            request.new_name += '.pdf'
+        
+        # Find the file with the matching original name (after UUID_)
+        renamed = False
+        for file_path in uploads_dir.glob("*.pdf"):
+            if file_path.name.endswith(f"_{request.old_name}"):
+                # Extract UUID prefix
+                uuid_prefix = file_path.name.split("_")[0]
+                new_path = uploads_dir / f"{uuid_prefix}_{request.new_name}"
+                
+                # Check if new name already exists
+                if new_path.exists():
+                    raise HTTPException(status_code=400, detail="A file with this name already exists")
+                
+                file_path.rename(new_path)
+                renamed = True
+                break
+        
+        if not renamed:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        return {
+            "status": "success",
+            "message": f"Successfully renamed to {request.new_name}",
+            "new_name": request.new_name
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/api/download/{filename}")
+async def download_file(filename: str):
+    """
+    Download a specific PDF file
+    """
+    try:
+        uploads_dir = Path("uploads")
+        if not uploads_dir.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Find the file with the matching original name (after UUID_)
+        for file_path in uploads_dir.glob("*.pdf"):
+            if file_path.name.endswith(f"_{filename}"):
+                return FileResponse(
+                    path=file_path,
+                    filename=filename,
+                    media_type='application/pdf'
+                )
+        
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
