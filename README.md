@@ -1153,7 +1153,7 @@ cd RAG-AI-Agent-in-Python
 
 ---
 
-**Made with ❤️ by developers, for developers**
+**By the Developer for Developers**
 
 **[⬆ Back to Top](#-docuchat-ai---intelligent-rag-powered-document-qa-system)**
 
