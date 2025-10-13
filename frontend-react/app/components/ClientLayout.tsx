@@ -2,6 +2,7 @@
 
 import { ReactNode, useState, useEffect, createContext, useContext } from 'react';
 import Sidebar from './Sidebar';
+import ErrorBoundary from './ErrorBoundary';
 
 interface ClientLayoutProps {
     children: ReactNode;
@@ -12,7 +13,7 @@ interface SidebarContextType {
 }
 
 const SidebarContext = createContext<SidebarContextType>({
-    refreshSidebar: () => {},
+    refreshSidebar: () => { },
 });
 
 export const useSidebarContext = () => useContext(SidebarContext);
@@ -22,18 +23,8 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     useEffect(() => {
-        // Check screen size to determine initial sidebar state
-        const handleResize = () => {
-            if (window.innerWidth >= 1024) {
-                setIsSidebarOpen(true);
-            } else {
-                setIsSidebarOpen(false);
-            }
-        };
-        
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        // Sidebar closed by default
+        setIsSidebarOpen(false);
     }, []);
 
     const refreshSidebar = () => {
@@ -41,15 +32,21 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     };
 
     return (
-        <SidebarContext.Provider value={{ refreshSidebar }}>
-            <div className="flex min-h-screen">
-                <Sidebar refreshTrigger={refreshTrigger} />
-                {/* Content area that shifts based on sidebar state */}
-                <div className="flex-1 transition-all duration-300">
-                    {children}
+        <ErrorBoundary>
+            <SidebarContext.Provider value={{ refreshSidebar }}>
+                <div className="flex min-h-screen">
+                    <ErrorBoundary>
+                        <Sidebar refreshTrigger={refreshTrigger} />
+                    </ErrorBoundary>
+                    {/* Content area that shifts based on sidebar state */}
+                    <div className="flex-1 transition-all duration-300">
+                        <ErrorBoundary>
+                            {children}
+                        </ErrorBoundary>
+                    </div>
                 </div>
-            </div>
-        </SidebarContext.Provider>
+            </SidebarContext.Provider>
+        </ErrorBoundary>
     );
 }
 
