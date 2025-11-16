@@ -23,9 +23,9 @@
 4. Deploy
 
 ### Step 3: Deploy Frontend (3 min)
-1. Go to https://vercel.com
+1. Go to https://netlify.com
 2. Import GitHub repo
-3. Set root: `frontend-react`
+3. Set base directory: `frontend-react`
 4. Add `NEXT_PUBLIC_API_URL`
 5. Deploy
 

@@ -83,7 +83,7 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
       setTotalFiles(0);
       setUploadedCount(0);
     }, 1000);
-  }, [onUploadSuccess]);
+  }, [onUploadSuccess, uploadSingleFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

@@ -4,7 +4,7 @@
 
 1. **Qdrant**: https://cloud.qdrant.io → Create cluster → Copy URL & API key
 2. **Backend**: https://render.com → New Web Service → Connect GitHub → Add env vars → Deploy
-3. **Frontend**: https://vercel.com → Import GitHub → Set root to `frontend-react` → Add `NEXT_PUBLIC_API_URL` → Deploy
+3. **Frontend**: https://netlify.com → Import GitHub → Set base to `frontend-react` → Add `NEXT_PUBLIC_API_URL` → Deploy
 4. **Done!** 🎉
 
 ---
@@ -19,14 +19,14 @@ QDRANT_API_KEY=your-key
 PORT=10000
 ```
 
-### Frontend (Vercel):
+### Frontend (Netlify):
 ```
 NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
 ```
 
 ### After Frontend Deploys (Render):
 ```
-FRONTEND_URL=https://your-app.vercel.app
+FRONTEND_URL=https://your-app.netlify.app
 ```
 
 ---
@@ -43,7 +43,7 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 pip install -r requirements.txt
 ```
 
-**Frontend Root Directory (Vercel):**
+**Frontend Base Directory (Netlify):**
 ```
 frontend-react
 ```
@@ -53,7 +53,7 @@ frontend-react
 ## Links You'll Need
 
 - Render: https://render.com
-- Vercel: https://vercel.com
+- Netlify: https://netlify.com
 - Qdrant Cloud: https://cloud.qdrant.io
 - OpenAI: https://platform.openai.com
 

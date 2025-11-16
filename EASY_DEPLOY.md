@@ -16,7 +16,7 @@ Before starting, make sure you have:
 
 ## 🎯 Deployment Strategy (Easiest)
 
-**Frontend**: Vercel (Free, Automatic)  
+**Frontend**: Netlify (Free, Automatic)  
 **Backend**: Render (Free, Simple)  
 **Database**: Qdrant Cloud (Free)
 
@@ -84,33 +84,34 @@ PORT = 10000
 
 ---
 
-## Step 3: Deploy Frontend to Vercel (3 minutes)
+## Step 3: Deploy Frontend to Netlify (3 minutes)
 
 ### 3.1 Create Account
-1. Go to https://vercel.com
+1. Go to https://netlify.com
 2. Sign up with GitHub (free)
 
 ### 3.2 Import Project
-1. Click "Add New..." → "Project"
-2. Import your GitHub repository
-3. Select: `RAG-AI-Agent-in-Python`
+1. Click "Add new site" → "Import an existing project"
+2. Choose "Deploy with GitHub"
+3. Select your repository: `RAG-AI-Agent-in-Python`
 
-### 3.3 Configure Project
-Vercel auto-detects Next.js! Just verify:
+### 3.3 Configure Build Settings
+Netlify auto-detects Next.js! Configure:
 
-**Framework Preset:**
-- Should show: `Next.js` ✅
+**Base Directory:**
+- Set to: `frontend-react`
 
-**Root Directory:**
-- Click "Edit" → Set to: `frontend-react`
+**Build Command:**
+- `npm run build` (auto-detected)
+
+**Publish Directory:**
+- `.next` (auto-detected)
 
 **Build Settings:**
-- Build Command: `npm run build` (auto)
-- Output Directory: `.next` (auto)
-- Install Command: `npm install` (auto)
+- Framework: Next.js (auto-detected)
 
 ### 3.4 Add Environment Variable
-Click "Environment Variables" → Add:
+Before deploying, click "Show advanced" → "New variable":
 
 ```
 NEXT_PUBLIC_API_URL = https://rag-ai-backend.onrender.com
@@ -119,17 +120,17 @@ NEXT_PUBLIC_API_URL = https://rag-ai-backend.onrender.com
 **Important**: Replace with your actual Render backend URL!
 
 ### 3.5 Deploy
-1. Click "Deploy"
+1. Click "Deploy site"
 2. Wait 2-3 minutes
 3. Your app is live! 🎉
 
-You'll get a URL like: `https://your-app.vercel.app`
+You'll get a URL like: `https://your-app.netlify.app`
 
 ---
 
 ## Step 4: Update CORS (2 minutes)
 
-After getting your Vercel frontend URL:
+After getting your Netlify frontend URL:
 
 1. Go back to Render dashboard
 2. Find your backend service
@@ -137,26 +138,23 @@ After getting your Vercel frontend URL:
 4. Add new variable:
 
 ```
-FRONTEND_URL = https://your-app.vercel.app
+FRONTEND_URL = https://your-app.netlify.app
 ```
 
-5. Update `main.py` CORS (or I can do this for you):
+**Important**: Replace with your actual Netlify URL!
+
+5. Backend will auto-redeploy with new CORS settings
+
+The `main.py` already has code to automatically include your frontend URL:
 
 ```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        os.getenv("FRONTEND_URL", ""),  # Your Vercel URL
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS auto-configures from FRONTEND_URL environment variable
+cors_origins = ["http://localhost:3000", "http://localhost:3001"]
+if os.getenv("FRONTEND_URL"):
+    cors_origins.append(os.getenv("FRONTEND_URL"))
 ```
 
-6. Redeploy backend (Render auto-redeploys on code changes)
+6. Wait for Render to redeploy (automatic)
 
 ---
 
@@ -175,7 +173,7 @@ Test your deployment:
 ## 🎉 You're Done!
 
 Your app is now live at:
-- **Frontend**: `https://your-app.vercel.app`
+- **Frontend**: `https://your-app.netlify.app`
 - **Backend**: `https://rag-ai-backend.onrender.com`
 
 ---
@@ -189,32 +187,35 @@ Your app is now live at:
 
 ### CORS errors?
 - Verify `FRONTEND_URL` is set in Render
-- Check `NEXT_PUBLIC_API_URL` in Vercel matches backend URL
-- Ensure CORS in `main.py` includes your Vercel URL
+- Check `NEXT_PUBLIC_API_URL` in Netlify matches backend URL
+- Ensure backend has redeployed after adding FRONTEND_URL
 
 ### Frontend can't connect?
-- Check `NEXT_PUBLIC_API_URL` is correct
+- Check `NEXT_PUBLIC_API_URL` is correct in Netlify environment variables
 - Verify backend is running (check Render dashboard)
 - Test backend directly: `https://your-backend.onrender.com/api/health`
+- Redeploy frontend if you changed environment variables
 
 ---
 
 ## 💡 Pro Tips
 
-1. **Custom Domain**: Add your domain in Vercel (free)
+1. **Custom Domain**: Add your domain in Netlify (free)
 2. **Monitor Usage**: Check Render dashboard for resource usage
 3. **Auto-Deploy**: Both platforms auto-deploy on git push
-4. **Environment Variables**: Update in dashboard, no code changes needed
+4. **Environment Variables**: Update in Netlify/Render dashboard, no code changes needed
+5. **Netlify Functions**: Can add serverless functions if needed later
 
 ---
 
 ## 📞 Need Help?
 
 If something doesn't work:
-1. Check the logs in Render/Vercel dashboard
+1. Check the logs in Render/Netlify dashboard
 2. Verify all environment variables are set
-3. Test backend health endpoint
+3. Test backend health endpoint: `https://your-backend.onrender.com/api/health`
 4. Check browser console for errors
+5. Try redeploying frontend if you changed environment variables
 
 ---
 
