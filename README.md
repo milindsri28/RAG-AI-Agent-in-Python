@@ -1050,9 +1050,6 @@ git push origin feature/amazing-feature
 ### 📖 Available Docs
 
 - **[Setup Instructions](SETUP_INSTRUCTIONS.md)** - Detailed installation guide
-- **[Today's Progress](TODAYS_PROGRESS_OCT_13_2025.md)** - Latest development updates
-- **[What's Next](WHATS_NEXT.md)** - Roadmap and upcoming features
-- **[Features](FEATURES.md)** - Complete feature list
 - **[API Documentation](http://localhost:8000/docs)** - Interactive API docs
 
 ### 🎓 Tutorials
