@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Send, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS } from '../utils/apiConfig';
 
 interface QueryFormProps {
   onQuerySuccess: (question: string, answer: string, sources: string[]) => void;
@@ -51,7 +52,7 @@ export default function QueryForm({ onQuerySuccess, isLoading, setIsLoading, sel
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/query', {
+      const response = await axios.post(API_ENDPOINTS.query, {
         question: question.trim(),
         top_k: topK,
       });

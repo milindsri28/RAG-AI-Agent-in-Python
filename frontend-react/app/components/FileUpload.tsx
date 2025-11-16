@@ -7,6 +7,7 @@ import { Upload, FileCheck, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../utils/errorHandler';
+import { API_ENDPOINTS } from '../utils/apiConfig';
 
 interface FileUploadProps {
   onUploadSuccess: (filename: string) => void;
@@ -25,7 +26,7 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/upload', formData, {
+      const response = await axios.post(API_ENDPOINTS.upload, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

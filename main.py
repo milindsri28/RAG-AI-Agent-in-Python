@@ -108,9 +108,20 @@ app = FastAPI()
 # Enable CORS for React frontend
 from fastapi.middleware.cors import CORSMiddleware
 
+# CORS configuration - automatically includes production URL from environment
+cors_origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+]
+
+# Add production frontend URL from environment if set
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    cors_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # React dev server
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../utils/errorHandler';
+import { API_ENDPOINTS } from '../utils/apiConfig';
 
 interface FileMetadata {
     name: string;
@@ -42,7 +43,7 @@ export default function Sidebar({ onFileSelect, refreshTrigger }: SidebarProps) 
     const fetchUploadedFiles = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/files');
+            const response = await fetch(API_ENDPOINTS.files);
             if (response.ok) {
                 const data = await response.json();
                 setUploadedFiles(data.files || []);
@@ -94,7 +95,7 @@ export default function Sidebar({ onFileSelect, refreshTrigger }: SidebarProps) 
 
         const deletePromise = (async () => {
             try {
-                const response = await fetch(`http://localhost:8000/api/delete/${encodeURIComponent(filename)}`, {
+                const response = await fetch(API_ENDPOINTS.delete(filename), {
                     method: 'DELETE',
                 });
 
@@ -135,7 +136,7 @@ export default function Sidebar({ onFileSelect, refreshTrigger }: SidebarProps) 
 
         const renamePromise = (async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/rename', {
+                const response = await fetch(API_ENDPOINTS.rename, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -179,7 +180,7 @@ export default function Sidebar({ onFileSelect, refreshTrigger }: SidebarProps) 
         event.stopPropagation();
 
         // Open download link in new tab
-        const downloadUrl = `http://localhost:8000/api/download/${encodeURIComponent(filename)}`;
+        const downloadUrl = API_ENDPOINTS.download(filename);
         window.open(downloadUrl, '_blank');
 
         toast.success(`📥 Downloading ${filename}`);

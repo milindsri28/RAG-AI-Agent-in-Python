@@ -1,9 +1,22 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct, Filter, FieldCondition, MatchValue
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class QdrantStorage:
-    def __init__(self, url="http://localhost:6333", collection="docs", dim=3072): 
-        self.client = QdrantClient(url=url, timeout=30)
+    def __init__(self, url=None, api_key=None, collection="docs", dim=3072): 
+        # Get from environment variables if not provided
+        url = url or os.getenv("QDRANT_URL", "http://localhost:6333")
+        api_key = api_key or os.getenv("QDRANT_API_KEY")
+        
+        # Initialize client with or without API key
+        if api_key:
+            self.client = QdrantClient(url=url, api_key=api_key, timeout=30)
+        else:
+            self.client = QdrantClient(url=url, timeout=30)
+        
         self.collection = collection
         if not self.client.collection_exists(self.collection):
             self.client.create_collection(
