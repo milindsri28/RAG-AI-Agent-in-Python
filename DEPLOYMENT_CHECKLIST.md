@@ -32,18 +32,18 @@ Use this checklist to ensure everything is deployed correctly.
 - [ ] Copied backend URL (e.g., `https://rag-ai-backend.onrender.com`)
 - [ ] Tested backend health: `https://your-backend.onrender.com/api/health`
 
-## Step 3: Frontend Deployment (Vercel)
+## Step 3: Frontend Deployment (Netlify)
 
-- [ ] Created Vercel account
+- [ ] Created Netlify account
 - [ ] Imported GitHub repository
-- [ ] Set root directory to: `frontend-react`
+- [ ] Set base directory to: `frontend-react`
 - [ ] Added environment variable: `NEXT_PUBLIC_API_URL` = your Render backend URL
 - [ ] Deployed successfully
-- [ ] Copied frontend URL (e.g., `https://your-app.vercel.app`)
+- [ ] Copied frontend URL (e.g., `https://your-app.netlify.app`)
 
 ## Step 4: Final Configuration
 
-- [ ] Added `FRONTEND_URL` environment variable in Render (your Vercel URL)
+- [ ] Added `FRONTEND_URL` environment variable in Render (your Netlify URL)
 - [ ] Backend redeployed (auto or manual)
 - [ ] CORS updated automatically
 
@@ -75,10 +75,10 @@ If all items are checked, your app is successfully deployed! 🚀
 
 ## Quick Links
 
-- **Frontend**: https://your-app.vercel.app
+- **Frontend**: https://your-app.netlify.app
 - **Backend**: https://rag-ai-backend.onrender.com
 - **Render Dashboard**: https://dashboard.render.com
-- **Vercel Dashboard**: https://vercel.com/dashboard
+- **Netlify Dashboard**: https://app.netlify.com
 - **Qdrant Dashboard**: https://cloud.qdrant.io
 
 ---
@@ -88,8 +88,8 @@ If all items are checked, your app is successfully deployed! 🚀
 | Issue | Solution |
 |-------|----------|
 | Backend not responding | Check Render logs, wait 30-60s for cold start |
-| CORS errors | Verify FRONTEND_URL in Render matches Vercel URL |
-| Frontend can't connect | Check NEXT_PUBLIC_API_URL in Vercel |
+| CORS errors | Verify FRONTEND_URL in Render matches Netlify URL |
+| Frontend can't connect | Check NEXT_PUBLIC_API_URL in Netlify, redeploy if changed |
 | Upload fails | Check backend logs, verify Qdrant connection |
 | No AI responses | Verify OPENAI_API_KEY is set correctly |
 
