@@ -7,6 +7,7 @@ import { Send, ArrowLeft, FileText, Copy, Check, Trash2, History, Download } fro
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../utils/errorHandler';
+import { API_ENDPOINTS } from '../utils/apiConfig';
 import { getChatHistory, saveChatHistory, clearChatHistory, StoredMessage } from '../utils/chatStorage';
 import { exportAsMarkdown, exportAsText, exportAsJSON, exportAsHTML } from '../utils/chatExport';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -83,7 +84,7 @@ export default function ChatContent() {
     useEffect(() => {
         const fetchFiles = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/files');
+                const response = await axios.get(API_ENDPOINTS.files);
                 // Extract just the names from the file objects
                 const fileNames = (response.data.files || []).map((file: any) =>
                     typeof file === 'string' ? file : file.name
@@ -181,7 +182,7 @@ I'll provide detailed answers based on the document content. Ask me anything abo
         setIsLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:8000/api/query', {
+            const response = await axios.post(API_ENDPOINTS.query, {
                 question: inputMessage.trim(),
                 top_k: topK,
                 source_file: selectedFile,  // Send the selected file to filter results
