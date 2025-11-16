@@ -2,12 +2,8 @@
 
 ## 🎯 Overview
 
-You now have **TWO frontend options**:
-
-1. **Streamlit** (Original) - Simple and quick
-2. **React/Next.js** (New) - Modern with advanced features
-
-**Backend stays the same** - All functionality preserved! ✅
+You now have a **React/Next.js frontend** with modern features.
+**Backend stays the same** – all functionality preserved! ✅
 
 ---
 
@@ -122,25 +118,11 @@ Allows React frontend on localhost:3000 to connect to backend on localhost:8000
 ---
 
 ## 🎯 Functionality Comparison
-
-| Feature | Streamlit | React |
-|---------|-----------|-------|
-| PDF Upload | ✅ Basic | ✅ Drag & Drop |
-| Query Interface | ✅ Simple | ✅ Advanced |
-| Progress Indicators | ❌ | ✅ Real-time |
-| Animations | ⚠️ Limited | ✅ Smooth |
-| Mobile Responsive | ⚠️ OK | ✅ Perfect |
-| Typing Indicators | ❌ | ✅ Yes |
-| Custom Styling | ⚠️ Limited | ✅ Full Control |
-| Performance | ⚠️ Good | ✅ Excellent |
-
-**Backend Functionality:** 100% SAME! ✅
+React provides a richer UX with drag & drop uploads, real-time progress, smooth animations, and excellent performance — while backend functionality remains 100% the same. ✅
 
 ---
 
-## 🎬 Running Both Frontends
-
-You can run both simultaneously!
+## 🎬 Run the App
 
 ### Terminal 1: Backend
 ```bash
@@ -152,13 +134,7 @@ python -m uvicorn main:app --reload --port 8000
 npx inngest-cli@latest dev
 ```
 
-### Terminal 3: Streamlit (Optional)
-```bash
-streamlit run streamlit_app.py
-# Runs on http://localhost:8501
-```
-
-### Terminal 4: React
+### Terminal 3: React
 ```bash
 cd frontend-react && npm run dev
 # Runs on http://localhost:3000
@@ -292,11 +268,9 @@ Components are modular - easy to extend!
 ---
 
 ## 💡 Tips
-
-1. **Development**: Use React frontend for best experience
-2. **Quick Tests**: Use Streamlit for rapid testing
-3. **Production**: Deploy React for end users
-4. **Backend**: Never needs changes for either frontend!
+1. **Development**: Use the React frontend for the best experience
+2. **Production**: Deploy React for end users
+3. **Backend**: No changes needed for the frontend choice
 
 ---
 
